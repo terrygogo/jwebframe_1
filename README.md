@@ -1,3 +1,3 @@
-# Quasar App
+# JionLab Web Management & Client FrameWork 
 
-> WIP
+> 시작 버전입니다. 
