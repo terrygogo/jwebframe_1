@@ -4,27 +4,21 @@
       <q-list dense link v-for="(values, key) in pre_check()" v-bind:key="key">
         <q-item>
           <q-item-side>
-                    <q-knob
-        v-model="vala"
-       :min="min"
-        :max="max" size="4rem"
-        color="primary"
-        readonly
-      > {{ vala }}%
-      </q-knob>
-             </q-item-side>
-               <q-item-main>
-        <q-list-header> {{key}}
-        </q-list-header>
-        <q-item dense v-for="(value, key1) in values" v-bind:key="key1">
-          <q-item-main>
-              {{key1}}
-          </q-item-main>
-          <q-item-side right>
-              {{value}}
+            <q-knob v-model="vala" :min="min" :max="max" size="4rem" color="primary" readonly> {{ vala }}%
+            </q-knob>
           </q-item-side>
-        </q-item>
-        </q-item-main>
+          <q-item-main>
+            <q-list-header> {{key}}
+            </q-list-header>
+            <q-item dense v-for="(value, key1) in values" v-bind:key="key1">
+              <q-item-main>
+                {{key1}}
+              </q-item-main>
+              <q-item-side right>
+                {{value}}
+              </q-item-side>
+            </q-item>
+          </q-item-main>
         </q-item>
       </q-list>
     </q-card-main>
@@ -40,7 +34,7 @@ export default {
       options: {
         separator: '.'
       },
-      results: this.$store.state.serverStat.systemInfo,
+      results: [],
       tempkey: '',
       picFlag: true,
       vala: 11,
@@ -63,13 +57,6 @@ export default {
   },
   created () {
     var that = this
-    that.$store.dispatch('serverStat/refreshSystemInfo', this.what)
-    if (this.period > 0) {
-      setInterval(() => {
-        that.$store.dispatch('serverStat/refreshSystemInfo', that.what, { root: true })
-      }, this.period)
-    }
-    /*
     this.$axios.get(this.what).then(function (response) {
       that.results = response.data
     })
@@ -77,17 +64,9 @@ export default {
       setInterval(() => {
         this.$axios.get(this.what).then(function (response) {
           that.results = response.data
-          if (that.toPic === 'noPic') {
-            that.picFlag = false
-            that.vala = 0
-          } else {
-            that.picFlag = true
-            that.vala = that.results.cpu[that.toPic] * 1
-          }
         })
       }, this.period)
     }
-    */
   },
   computed: {
     styles: function () {
@@ -106,7 +85,7 @@ export default {
   watch: {},
   methods: {
     pre_check () {
-      this.results = this.$store.getters['serverStat/getSystemInfo']
+      // this.results = this.$store.getters['serverStat/getSystemInfo']
       var xx
       for (xx in this.results) {
         if (typeof this.results[xx] !== 'object') {

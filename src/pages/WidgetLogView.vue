@@ -1,7 +1,7 @@
 <template>
     <!-- content -->
   <q-page padding class="docs-table">
-    <p class="caption">Pagination, sorting & filtering happens on the server</p>
+    <p class="caption">Web Proxy Log</p>
     <q-table dense
       ref="table"
       color="primary"
@@ -48,7 +48,8 @@ export default {
       serverData: [],
       serverPagination: {
         page: 1,
-        rowsNumber: 10 // specifying this determines pagination is server-side
+        rowsNumber: 10, // specifying this determines pagination is server-side
+        rowsPerPage: 10
       },
       columns: [],
       db_columns: [],
@@ -118,7 +119,7 @@ export default {
               }
             }
             that.db_columns = xx
-          }).bind()
+          })
       })
     this.loadDataInfo({
       pagination: this.serverPagination,

@@ -2,6 +2,7 @@
 import axios from 'axios'
 import VueAxios from 'vue-axios'
 import VueAuth from '@websanova/vue-auth'
+
 export default ({ Vue, router, app }) => {
   Vue.prototype.$axios = axios
   Vue.router = router

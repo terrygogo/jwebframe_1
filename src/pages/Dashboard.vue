@@ -10,7 +10,6 @@
     {label: 'flex', value: false},
   ]"
 /></q-list-header>
-      <q-collapsible icon="explore" :label="serverLabel" opened>
         <q-window-resize-observable @resize="onResize" />
           <grid-layout v-if="gridview === true" :layout="layout" :auto-size="true" :col-num="12" :is-draggable="true" :is-resizable="true" :vertical-compact="true" :dragIgnoreFrom="ignorelist"
             :use-css-transforms="true" :row-height="30" :col-width="30" ref="GridLayout" @layout-updated="layoutUpdatedEvent" >
@@ -27,7 +26,6 @@
               </component>
             </div>
           </div>
-      </q-collapsible>
     </q-list>
   </q-page>
 </template>
@@ -39,6 +37,7 @@ var GridItem = VueGridLayout.GridItem
 import cardStateList from '../components/cardStateList.vue'
 import cardStateTable from '../components/cardStateTable.vue'
 import cardSystemState from '../components/cardSystemState.vue'
+import cardTopStat from '../components/cardTopStat.vue'
 import {mapGetters} from 'vuex'
 export default {
   name: 'Dashboard',
@@ -47,7 +46,8 @@ export default {
     GridItem: GridItem,
     cardStateList,
     cardStateTable,
-    cardSystemState
+    cardSystemState,
+    cardTopStat
   },
   data () {
     return {
