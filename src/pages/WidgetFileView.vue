@@ -13,17 +13,16 @@
           </div>
           <div class="col" v-if="model">
             <q-card>
-  <q-card-title>
-    {{model.name}}
-  </q-card-title>
-  <q-card-separator />
-  <q-card-main>
-      <q-scroll-area style="width: 400px; height: 500px;">
-       <div v-html="content">
-  </div>
-            </q-scroll-area>
-  </q-card-main>
-</q-card>
+              <q-card-title>
+                {{model.name}}//바보<div class="q-caption">{{model.id}}</div>
+              </q-card-title>
+              <q-card-separator />
+              <q-card-main  >
+                 <div id="vue-frame" class="row" style="height: 400px;">
+    <iframe   :src="model.webViewLink" class="col-12" ></iframe>
+</div>
+                  </q-card-main>
+            </q-card>
           </div>
         </q-card-main>
       </q-card>
@@ -33,10 +32,13 @@
 
 <script>
 /* global gapi */
+import VueFrame from 'vue-frame'
 export default {
   // name: 'PageName',
+  components: { VueFrame },
   data () {
     return {
+      editable: true,
       table_select_idx: 0,
       selected_model: [],
       content: '',
@@ -50,6 +52,14 @@ export default {
           sortable: true
         },
         {
+          name: 'modifiedTime',
+          required: true,
+          label: 'modifiedTime',
+          align: 'left',
+          field: 'modifiedTime',
+          sortable: true
+        },
+        {
           name: 'id',
           required: true,
           label: 'id',
@@ -58,11 +68,17 @@ export default {
           sortable: true
         }
       ],
-      model_list: []
+      model_list: [],
+      model: null
+    }
+  },
+  watch: {
+    selected_model: function (val) {
+      this.getSelectedGDDocs(this.selected_model[0].id)
     }
   },
   computed: {
-    model: function () {
+    oldmodel: function () {
       return this.selected_model[this.table_select_idx]
     }
   },
@@ -103,18 +119,21 @@ export default {
         var that = this
         gapi.client.drive.files
           .list({
-            pageSize: 10,
-            fields: 'nextPageToken, files(id, name)'
+            pageSize: 50,
+            fields: 'nextPageToken, files(id, name, modifiedTime)',
+            q: 'trashed != true'
           })
           .then(function (response) {
             // appendPre('Files:');
             // debugger
             var files = response.result.files
             if (files && files.length > 0) {
+              that.model_list = []
               for (var i = 0; i < files.length; i++) {
                 // var file = files[i]
-                that.model_list.push({ id: files[i].id, name: files[i].name })
+                that.model_list.push({ id: files[i].id, modifiedTime: files[i].modifiedTime, name: files[i].name })
               }
+              /*
               debugger
               var thot = that
               gapi.client.drive.files.export(
@@ -127,6 +146,7 @@ export default {
               }).catch(function (connErr) {
                 console.log('Error in database connection: ' + connErr)
               })
+              */
             }
           })
       } else {
@@ -134,28 +154,27 @@ export default {
     },
     exportSelectedGDDocs () {
       var thot = this
-      gapi.client.drive.files.export(
-        {
-          fileId: this.model.id,
-          mimeType: 'text/html'
-        },
-        {
-          responseType: 'stream'
-        },
-        function (err, response) {
-          debugger
-          if (err) return console.log(err)
-          response.data
-            .on('error', err => {
-              console.log(err)
-            })
-            .on('end', () => {
-              thot.content = response.data
-              console.log('success')
-              return response.data
-            })
-        }
-      )
+      gapi.client.drive.files.export({
+        fileId: thot.model.id,
+        mimeType: 'test/html'
+      }).then(function (response) {
+        debugger
+        thot.content = response.body
+        return response.body
+      }).catch(function (connErr) {
+        console.log('Error in gapi export connection: ' + connErr)
+      })
+    },
+    getSelectedGDDocs (id) {
+      var thot = this
+      gapi.client.drive.files.get({
+        fileId: id,
+        fields: '*'
+      }).then(function (response) {
+        thot.model = response.result
+      }).catch(function (connErr) {
+        console.log('Error in gapi get: ' + connErr)
+      })
     }
   }
 }
