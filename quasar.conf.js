@@ -117,7 +117,8 @@ module.exports = function (ctx) {
         'QScrollArea',
         'QDialog',
         'QKnob',
-        'QBtnToggle'
+        'QBtnToggle',
+        'QUploader'
       ],
       directives: [
         'Ripple',

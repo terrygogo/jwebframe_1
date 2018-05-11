@@ -14,15 +14,25 @@
           <div class="col" v-if="model">
             <q-card>
               <q-card-title>
-                {{model.name}}//바보<div class="q-caption">{{model.id}}</div>
+                {{model.name}}
+                <div class="q-caption">{{model.id}}</div>
               </q-card-title>
               <q-card-separator />
-              <q-card-main  >
-                 <div id="vue-frame" class="row" style="height: 400px;">
-    <iframe   :src="model.webViewLink" class="col-12" ></iframe>
-</div>
-                  </q-card-main>
+              <q-card-main>
+                <div id="vue-frame" class="row" style="height: 400px;">
+                  <iframe :src="model.webViewLink" class="col-12"></iframe>
+                </div>
+              </q-card-main>
             </q-card>
+          </div>
+        </q-card-main>
+      </q-card>
+    </q-collapsible>
+        <q-collapsible group="somegroup" opened icon="cloud" label="Google Drive">
+      <q-card>
+        <q-card-main class="row gutter-xs">
+          <div class="col">
+            <q-uploader :url="url" auto-expand :send-raw="true"  :headers="daegari" @start="urlheader"/>
           </div>
         </q-card-main>
       </q-card>
@@ -38,9 +48,12 @@ export default {
   components: { VueFrame },
   data () {
     return {
+      url: 'https://www.googleapis.com/upload/drive/v3/files?uploadType=media',
       editable: true,
+      gapiloaded: false,
       table_select_idx: 0,
       selected_model: [],
+      daegari: {},
       content: '',
       columns: [
         {
@@ -82,12 +95,24 @@ export default {
       return this.selected_model[this.table_select_idx]
     }
   },
-  mounted: function () {
+  created: function () {
     let ckeditor = document.createElement('script')
     ckeditor.setAttribute('src', 'https://apis.google.com/js/api:client.js')
     document.head.appendChild(ckeditor)
   },
   methods: {
+    urlheader () {
+      // const contentType = file.type // To send the correct Content-Type
+      // const fileName = file.name // If you want to use this value to calculate the S3 Key.
+      this.daegari = { Authorization: 'Bearer ' + gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().access_token }
+    },
+    async urlFactory (file) {
+      // const contentType = file.type // To send the correct Content-Type
+      // const fileName = file.name // If you want to use this value to calculate the S3 Key.
+      this.daegari = { Authorization: 'Bearer ' + gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().access_token }
+      debugger
+      return 'https://www.googleapis.com/upload/drive/v3/files?uploadType=media'
+    },
     refreshModel () {
       var CLIENT_ID =
         '559012310439-48d8cpk0sdfcumernjri8q7ij9svvlji.apps.googleusercontent.com'
@@ -95,7 +120,7 @@ export default {
       var DISCOVERY_DOCS = [
         'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'
       ]
-      var SCOPES = 'https://www.googleapis.com/auth/drive.readonly'
+      var SCOPES = 'https://www.googleapis.com/auth/drive.file'
       var that = this
       gapi.client
         .init({
@@ -112,6 +137,7 @@ export default {
           // Handle the initial sign-in state.
           that.updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get())
           gapi.auth2.getAuthInstance().signIn()
+          that.daegari = { Authorization: 'Bearer ' + gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().access_token }
         })
     },
     updateSigninStatus (isSignedIn) {
@@ -131,7 +157,11 @@ export default {
               that.model_list = []
               for (var i = 0; i < files.length; i++) {
                 // var file = files[i]
-                that.model_list.push({ id: files[i].id, modifiedTime: files[i].modifiedTime, name: files[i].name })
+                that.model_list.push({
+                  id: files[i].id,
+                  modifiedTime: files[i].modifiedTime,
+                  name: files[i].name
+                })
               }
               /*
               debugger
@@ -154,27 +184,33 @@ export default {
     },
     exportSelectedGDDocs () {
       var thot = this
-      gapi.client.drive.files.export({
-        fileId: thot.model.id,
-        mimeType: 'test/html'
-      }).then(function (response) {
-        debugger
-        thot.content = response.body
-        return response.body
-      }).catch(function (connErr) {
-        console.log('Error in gapi export connection: ' + connErr)
-      })
+      gapi.client.drive.files
+        .export({
+          fileId: thot.model.id,
+          mimeType: 'test/html'
+        })
+        .then(function (response) {
+          debugger
+          thot.content = response.body
+          return response.body
+        })
+        .catch(function (connErr) {
+          console.log('Error in gapi export connection: ' + connErr)
+        })
     },
     getSelectedGDDocs (id) {
       var thot = this
-      gapi.client.drive.files.get({
-        fileId: id,
-        fields: '*'
-      }).then(function (response) {
-        thot.model = response.result
-      }).catch(function (connErr) {
-        console.log('Error in gapi get: ' + connErr)
-      })
+      gapi.client.drive.files
+        .get({
+          fileId: id,
+          fields: '*'
+        })
+        .then(function (response) {
+          thot.model = response.result
+        })
+        .catch(function (connErr) {
+          console.log('Error in gapi get: ' + connErr)
+        })
     }
   }
 }

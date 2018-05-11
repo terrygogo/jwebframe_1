@@ -2,7 +2,7 @@
   <q-card ref="cardman">
     <q-card-title  class="card-title text-white q-pt-xs q-pb-xs" :class="baseColor">
       <q-icon :name="iconName"></q-icon>
-      <small>{{cardTitle}}</small>
+      <small>{{cardTitle}} rla </small>
       <q-btn slot="right" small flat>
         <q-icon name="refresh" />
       </q-btn>
